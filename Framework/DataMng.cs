@@ -17,10 +17,6 @@ public class DataMng : MonoBehaviour {
         }
     }
 
-    public static string DefaultPath {
-        get { return Application.persistentDataPath; }
-    }
-
 
     public static void Init() {
         var mng = FindObjectOfType<DataMng>();
@@ -31,39 +27,29 @@ public class DataMng : MonoBehaviour {
         var go = new GameObject("DataMng");
 
         _Instance = go.AddComponent<DataMng>();
-        _Instance.DataPath = DefaultPath;
 
         DontDestroyOnLoad(go);
     }
 
-    public string DataPath { get; private set; }
-
-    public void SetDataPath(string p_path) {
-        DataPath = p_path;
-    }
-
-    public void Save(object p_data, string p_fileName) {
-        string path = DataPath + "/" + p_fileName;
+    public void Save(object p_data, string p_path) {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream fs = File.Create(path);
+        FileStream fs = File.Create(p_path);
         bf.Serialize(fs, p_data);
         fs.Close();
 
-        Debug.Log("File Saved, Path: " + path);
+        Debug.Log("File Saved, Path: " + p_path);
     }
 
-    public T Load<T>(string p_fileName) {
-        string path = DataPath + "/" + p_fileName;
-
-        if (!File.Exists(path))
+    public T Load<T>(string p_path) {
+        if (!File.Exists(p_path))
             return default(T);
 
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream fs = File.Open(path, FileMode.Open);
+        FileStream fs = File.Open(p_path, FileMode.Open);
         T retval = (T) bf.Deserialize(fs);
         fs.Close();
 
-        Debug.Log("File Loaded, Path: " + path);
+        Debug.Log("File Loaded, Path: " + p_path);
 
         return retval;
     }
