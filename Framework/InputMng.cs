@@ -71,13 +71,7 @@ public class InputMng : MonoBehaviour {
     private static InputMng _Instance;
 
     public static InputMng Instance {
-        get {
-            if (GameCtrl.Instance == null) {
-                GameCtrl.Init();
-            }
-
-            return _Instance;
-        }
+        get { return _Instance; }
     }
 
     public static void Init() {

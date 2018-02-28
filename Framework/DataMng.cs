@@ -8,13 +8,7 @@ public class DataMng : MonoBehaviour {
     private static DataMng _Instance;
 
     public static DataMng Instance {
-        get {
-            if (GameCtrl.Instance == null) {
-                GameCtrl.Init();
-            }
-
-            return _Instance;
-        }
+        get { return _Instance; }
     }
 
 

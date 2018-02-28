@@ -24,13 +24,7 @@ public class AudioMng : MonoBehaviour {
     private static AudioMng _Instance;
 
     public static AudioMng Instance {
-        get {
-            if (GameCtrl.Instance == null) {
-                GameCtrl.Init();
-            }
-
-            return _Instance;
-        }
+        get { return _Instance; }
     }
 
     public static void Init() {
