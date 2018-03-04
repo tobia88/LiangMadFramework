@@ -67,6 +67,8 @@ public class SceneMng : MonoBehaviour {
             yield return SceneManager.UnloadSceneAsync(m_lastSceneName);
 
             m_currentScene = null;
+
+            Debug.Log("Scene Unload: " + m_lastSceneName);
         }
     }
 

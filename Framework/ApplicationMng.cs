@@ -34,7 +34,7 @@ public class ApplicationMng : MonoBehaviour {
 
     private void SwitchScene() {
         if (m_nextSceneName != null) {
-            SceneMng.Instance.LoadSceneImmediate(m_nextSceneName);
+            SceneMng.Instance.LoadScene(m_nextSceneName);
             m_nextSceneName = null;
         }
 
