@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public abstract class Scene : BaseEntity {
     public bool IsUnloading { get; private set; }
+    public string sceneName;
 
     protected virtual void Awake() {
         if (!ApplicationMng.IsInit) {
@@ -12,6 +13,9 @@ public abstract class Scene : BaseEntity {
             return;
         }
         Initialize();
+
+        sceneName = SceneManager.GetActiveScene().name;
+        Debug.Log("Active Scene: " + sceneName);
     }
 
     protected virtual void Initialize() { }

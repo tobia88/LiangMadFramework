@@ -27,28 +27,33 @@ public class SceneMng : MonoBehaviour {
 
     public System.Action FirePreUnloadEvent;
     public System.Action FireUnloadEvent;
+    public System.Action<string> FireFinishEvent;
 
     private Scene m_currentScene;
 
     private string m_lastSceneName;
     private string m_sceneName;
 
-    public void LoadScene(string sceneName, params object[] args) {
+    public void LoadScene(string _sceneName, bool _unload = true, params object[] _args) {
         // Load Scene
-        StartCoroutine(LoadSceneAsync(sceneName, LoadSceneMode.Additive, args));
+        StartCoroutine(LoadSceneAsync(_sceneName, LoadSceneMode.Additive, _unload, _args));
     }
 
-    public void LoadSceneImmediate(string sceneName, params object[] args) {
-        m_sceneName = sceneName;
-        StartCoroutine(LoadSceneAsync(sceneName, LoadSceneMode.Single, args));
+    public void UnloadScene(string _sceneName) {
+        SceneManager.UnloadSceneAsync(_sceneName);
     }
 
-    IEnumerator LoadSceneAsync(string sceneName, LoadSceneMode sceneMode, params object[] args) {
+    IEnumerator LoadSceneAsync(string _sceneName, LoadSceneMode _sceneMode, bool _unload, params object[] _args) {
         m_lastSceneName = m_sceneName;
-        m_sceneName = sceneName;
+        m_sceneName = _sceneName;
 
-        yield return StartCoroutine(UnloadSceneProgress());
-        yield return StartCoroutine(LoadScene(sceneMode, args));
+        if (_unload) {
+            yield return StartCoroutine(UnloadSceneProgress());
+        }
+        yield return StartCoroutine(LoadScene(_sceneMode, _args));
+
+        if (FireFinishEvent != null)
+            FireFinishEvent(_sceneName);
 
         Debug.Log("Scene Loaded: " + m_sceneName);
     }
@@ -72,8 +77,8 @@ public class SceneMng : MonoBehaviour {
         }
     }
 
-    IEnumerator LoadScene(LoadSceneMode sceneMode = LoadSceneMode.Single, params object[] args) {
-        AsyncOperation async = SceneManager.LoadSceneAsync(m_sceneName, sceneMode);
+    IEnumerator LoadScene(LoadSceneMode _sceneMode = LoadSceneMode.Single, params object[] _args) {
+        AsyncOperation async = SceneManager.LoadSceneAsync(m_sceneName, _sceneMode);
 
         while (!async.isDone) {
             if (loadProgressCallback != null)
@@ -83,6 +88,6 @@ public class SceneMng : MonoBehaviour {
         }
 
         m_currentScene = FindObjectOfType<Scene>();
-        m_currentScene.OnStart(args);
+        m_currentScene.OnStart(_args);
     }
 }

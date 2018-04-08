@@ -50,6 +50,8 @@ public class KeyCodeExectutor {
     public void Update() {
         assignedKeys.ForEach(a => a.Update());
 
+        Debug.Log(key);
+
         if (assignedKeys.TrueForAll(k => k.isPressed)) {
             if (onlyExecuteOnce && isActivated) {
                 return;
