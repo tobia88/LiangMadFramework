@@ -6,19 +6,14 @@ using UnityEngine.SceneManagement;
 public class ApplicationMng : MonoBehaviour {
     public static bool IsInit { get; private set; }
 
-    private static string m_nextSceneName;
-
-    public static void InitAndBackToCurrentScene() {
-        m_nextSceneName = SceneManager.GetActiveScene().name;
-        SceneManager.LoadScene("ApplicationScene");
-    }
-
     private void Awake() {
+        if (IsInit)
+            Destroy(gameObject);
+
         InitializeUnity();
         InitializeGame();
 
         IsInit = true;
-        SwitchScene();
     }
 
     private void InitializeUnity() {
@@ -30,13 +25,5 @@ public class ApplicationMng : MonoBehaviour {
         DataMng.Init();
         InputMng.Init();
         SceneMng.Init();
-    }
-
-    private void SwitchScene() {
-        if (m_nextSceneName != null) {
-            SceneMng.Instance.LoadScene(m_nextSceneName);
-            m_nextSceneName = null;
-        }
-
     }
 }

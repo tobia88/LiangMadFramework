@@ -13,16 +13,7 @@ public class DataMng : MonoBehaviour {
 
 
     public static void Init() {
-        var mng = FindObjectOfType<DataMng>();
-
-        if (mng != null)
-            Destroy(mng.gameObject);
-
-        var go = new GameObject("DataMng");
-
-        _Instance = go.AddComponent<DataMng>();
-
-        DontDestroyOnLoad(go);
+        _Instance = FindObjectOfType<DataMng>();
     }
 
     public void Save(object p_data, string p_path) {

@@ -77,15 +77,7 @@ public class InputMng : MonoBehaviour {
     }
 
     public static void Init() {
-        var mng = FindObjectOfType<InputMng>();
-
-        if (mng != null)
-            Destroy(mng.gameObject);
-
-        var go = new GameObject("InputMng");
-        _Instance = go.AddComponent<InputMng>();
-
-        DontDestroyOnLoad(go);
+        _Instance = FindObjectOfType<InputMng>();
     }
 
     public void Assign(Action p_func, bool p_executeOnce, params KeyCode[] p_keyCodes) {

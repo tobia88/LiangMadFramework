@@ -11,9 +11,28 @@ public static class LiangExtentions {
     }
 
     public static string ToListString<T>(this List<T> _list) {
+        return ToArrayString(_list.ToArray());
+    }
+
+    public static void Shuffle<T>(this List<T> _list) {
+        for (int i = 0; i < _list.Count; i++) {
+            int randIndex = Random.Range(0, _list.Count);
+
+            T origin = _list[i];
+            _list[i] = _list[randIndex];
+            _list[randIndex] = origin;
+        }
+    }
+
+    // ===============================================
+    // ARRAY EXTENSIONS
+    // ===============================================
+
+
+    public static string ToArrayString<T>(this T[] _list) {
         string retval = _list[0].ToString();
 
-        for (int i = 1; i < _list.Count; i++) {
+        for (int i = 1; i < _list.Length; i++) {
             retval += ",";
             retval += _list[i].ToString();
         }
@@ -21,22 +40,8 @@ public static class LiangExtentions {
         return retval;
     }
 
-    // ===============================================
-    // ARRAY EXTENSIONS
-    // ===============================================
-
     public static T GetRandom<T>(this T[] _array) {
         return _array[Random.Range(0, _array.Length)];
-    }
-
-    public static void Shuffle<T>(this List<T> _list) {
-        for(int i = 0; i < _list.Count; i++) {
-            int randIndex = Random.Range(0, _list.Count);
-
-            T origin = _list[i];
-            _list[i] = _list[randIndex];
-            _list[randIndex] = origin;
-        }
     }
 
     public static void Shuffle<T>(this T[] _array) {

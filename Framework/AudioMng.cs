@@ -28,15 +28,7 @@ public class AudioMng : MonoBehaviour {
     }
 
     public static void Init() {
-        var mng = FindObjectOfType<AudioMng>();
-
-        if (mng != null)
-            Destroy(mng.gameObject);
-
-        var go = new GameObject("AudioMng");
-        _Instance = go.AddComponent<AudioMng>();
-
-        DontDestroyOnLoad(go);
+        _Instance = FindObjectOfType<AudioMng>();
     }
 
     public Dictionary<AudioClip, AudioSource> sources = new Dictionary<AudioClip, AudioSource>();

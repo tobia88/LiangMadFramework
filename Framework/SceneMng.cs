@@ -2,6 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
+
+[System.Serializable]
+public class SceneData {
+    public Object sceneAsset;
+    public SceneTypes sceneType;
+
+    public string sceneName {
+        get { return sceneAsset.name; }
+    }
+
+    public bool IsValid {
+        get { return sceneAsset != null; }
+    }
+
+    public bool IsLoaded {
+        get { return SceneManager.GetSceneByName(sceneName).isLoaded; }
+    }
+}
+
+public enum SceneTypes {
+    Main,
+    Sub
+}
 
 public class SceneMng : MonoBehaviour {
     private static SceneMng _Instance;
@@ -11,17 +35,10 @@ public class SceneMng : MonoBehaviour {
     }
 
     public static void Init() {
-        var mng = FindObjectOfType<SceneMng>();
-
-        if (mng != null)
-            Destroy(mng.gameObject);
-
-        var go = new GameObject("SceneMng");
-
-        _Instance = go.AddComponent<SceneMng>();
-
-        DontDestroyOnLoad(go);
+        _Instance = FindObjectOfType<SceneMng>();
     }
+
+    public SceneData firstLoadScene;
 
     public System.Action<float> loadProgressCallback;
 
@@ -29,56 +46,87 @@ public class SceneMng : MonoBehaviour {
     public System.Action FireUnloadEvent;
     public System.Action<string> FireFinishEvent;
 
-    private Scene m_currentScene;
+    private string m_currentScene;
 
-    private string m_lastSceneName;
-    private string m_sceneName;
+    private void Start() {
+        if (firstLoadScene != null) {
+            if (!firstLoadScene.IsLoaded) {
+                LoadScene(firstLoadScene);
+            }
 
-    public void LoadScene(string _sceneName, bool _unload = true, params object[] _args) {
-        // Load Scene
-        StartCoroutine(LoadSceneAsync(_sceneName, LoadSceneMode.Additive, _unload, _args));
+            SetCurrentScene(firstLoadScene.sceneName);
+        }
+    }
+
+    public string CurrentScene {
+        get { return m_currentScene; }
+    }
+
+    public void LoadScene(SceneData _sceneData) {
+        if (_sceneData.IsLoaded) {
+            if (FireFinishEvent != null)
+                FireFinishEvent(_sceneData.sceneName);
+            return;
+        }
+
+        StartCoroutine(LoadSceneAsync(_sceneData));
     }
 
     public void UnloadScene(string _sceneName) {
-        SceneManager.UnloadSceneAsync(_sceneName);
+        StartCoroutine(UnloadSceneProgress(_sceneName));
     }
 
-    IEnumerator LoadSceneAsync(string _sceneName, LoadSceneMode _sceneMode, bool _unload, params object[] _args) {
-        m_lastSceneName = m_sceneName;
-        m_sceneName = _sceneName;
+    public void UnloadScene(Scene _scene) {
+        StartCoroutine(UnloadSceneProgress(_scene.sceneName));
+    }
 
-        if (_unload) {
-            yield return StartCoroutine(UnloadSceneProgress());
+    public void SetCurrentScene(string _sceneName) {
+        m_currentScene = _sceneName;
+        Debug.Log("Current Scene: " + m_currentScene);
+    }
+
+    IEnumerator LoadSceneAsync(SceneData _sceneData) {
+        string sceneName = _sceneData.sceneAsset.name;
+
+        if (_sceneData.sceneType == SceneTypes.Main) {
+            if (!string.IsNullOrEmpty(m_currentScene)) {
+                yield return StartCoroutine(UnloadSceneProgress(m_currentScene));
+            }
+
+            m_currentScene = _sceneData.sceneName;
         }
-        yield return StartCoroutine(LoadScene(_sceneMode, _args));
+
+
+        yield return StartCoroutine(LoadScene(sceneName, LoadSceneMode.Additive));
 
         if (FireFinishEvent != null)
-            FireFinishEvent(_sceneName);
+            FireFinishEvent(sceneName);
 
-        Debug.Log("Scene Loaded: " + m_sceneName);
+        Debug.Log("Scene Loaded: " + sceneName);
     }
 
-    IEnumerator UnloadSceneProgress() {
-        if (m_currentScene != null) {
+    IEnumerator UnloadSceneProgress(string _sceneName) {
+        Scene unloadScene = FindObjectsOfType<Scene>().FirstOrDefault(s => s.sceneName == _sceneName);
 
+        if (unloadScene != null) {
             if (FirePreUnloadEvent != null)
                 FirePreUnloadEvent();
 
-            m_currentScene.PreUnload();
+            unloadScene.PreUnload();
 
             if (FireUnloadEvent != null)
                 FireUnloadEvent();
-
-            yield return SceneManager.UnloadSceneAsync(m_lastSceneName);
-
-            m_currentScene = null;
-
-            Debug.Log("Scene Unload: " + m_lastSceneName);
         }
+
+        if (SceneManager.GetSceneByName(_sceneName).isLoaded) {
+            yield return SceneManager.UnloadSceneAsync(_sceneName);
+        }
+
+        Debug.Log("Scene Unload: " + _sceneName);
     }
 
-    IEnumerator LoadScene(LoadSceneMode _sceneMode = LoadSceneMode.Single, params object[] _args) {
-        AsyncOperation async = SceneManager.LoadSceneAsync(m_sceneName, _sceneMode);
+    IEnumerator LoadScene(string _sceneName, LoadSceneMode _sceneMode = LoadSceneMode.Single) {
+        AsyncOperation async = SceneManager.LoadSceneAsync(_sceneName, _sceneMode);
 
         while (!async.isDone) {
             if (loadProgressCallback != null)
@@ -86,8 +134,5 @@ public class SceneMng : MonoBehaviour {
 
             yield return 1;
         }
-
-        m_currentScene = FindObjectOfType<Scene>();
-        m_currentScene.OnStart(_args);
     }
 }
