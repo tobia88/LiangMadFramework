@@ -38,8 +38,6 @@ public class SceneMng : MonoBehaviour {
         _Instance = FindObjectOfType<SceneMng>();
     }
 
-    public SceneData firstLoadScene;
-
     public System.Action<float> loadProgressCallback;
 
     public System.Action FirePreUnloadEvent;
@@ -48,13 +46,11 @@ public class SceneMng : MonoBehaviour {
 
     private string m_currentScene;
 
-    private void Start() {
-        if (firstLoadScene != null) {
-            if (!firstLoadScene.IsLoaded) {
-                LoadScene(firstLoadScene);
-            }
-
-            SetCurrentScene(firstLoadScene.sceneName);
+    private void Awake() {
+        if (string.IsNullOrEmpty(m_currentScene)) {
+            Scene scn = FindObjectOfType<Scene>();
+            if (scn != null)
+                SetCurrentScene(scn.sceneName);
         }
     }
 
@@ -95,7 +91,6 @@ public class SceneMng : MonoBehaviour {
 
             m_currentScene = _sceneData.sceneName;
         }
-
 
         yield return StartCoroutine(LoadScene(sceneName, LoadSceneMode.Additive));
 

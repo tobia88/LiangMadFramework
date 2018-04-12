@@ -7,9 +7,6 @@ public class ApplicationMng : MonoBehaviour {
     public static bool IsInit { get; private set; }
 
     private void Awake() {
-        if (IsInit)
-            Destroy(gameObject);
-
         InitializeUnity();
         InitializeGame();
 
