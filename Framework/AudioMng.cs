@@ -21,14 +21,10 @@ public class Sound {
 }
 
 public class AudioMng : MonoBehaviour {
-    private static AudioMng _Instance;
-
-    public static AudioMng Instance {
-        get { return _Instance; }
-    }
+    public static AudioMng Instance { get; private set; }
 
     public static void Init() {
-        _Instance = FindObjectOfType<AudioMng>();
+        Instance = FindObjectOfType<AudioMng>();
     }
 
     public Dictionary<AudioClip, AudioSource> sources = new Dictionary<AudioClip, AudioSource>();

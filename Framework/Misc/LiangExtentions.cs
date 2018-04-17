@@ -53,4 +53,18 @@ public static class LiangExtentions {
             _array[randIndex] = origin;
         }
     }
+
+
+    // ===============================================
+    // ARRAY EXTENSIONS
+    // ===============================================
+
+    public static void Clear(this Transform _trans) {
+        for(int i = 0; i < _trans.childCount; i++) {
+            if (Application.isPlaying)
+                Object.Destroy(_trans.GetChild(i).gameObject);
+            else
+                Object.DestroyImmediate(_trans.GetChild(i).gameObject);
+        }
+    }
 }

@@ -50,8 +50,6 @@ public class KeyCodeExectutor {
     public void Update() {
         assignedKeys.ForEach(a => a.Update());
 
-        Debug.Log(key);
-
         if (assignedKeys.TrueForAll(k => k.isPressed)) {
             if (onlyExecuteOnce && isActivated) {
                 return;
@@ -84,10 +82,11 @@ public class InputMng : MonoBehaviour {
         var key = KeyCodesToKey (p_keyCodes);
 
         if (keysDict.ContainsKey(key)) {
-            Debug.Log("Key is already assigned, Update Function");
+            Debug.Log("InputMng:Key is already assigned, Update Function");
             keysDict[key].callFunc = p_func;
         }
         else {
+            Debug.Log("InputMng:Key " + p_keyCodes.ToArrayString() + " Is Succeed Assigned");
             var e = new KeyCodeExectutor (key, p_func, p_executeOnce, p_keyCodes);
             keysDict.Add(key, e);
             executors.Add(e);

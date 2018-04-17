@@ -7,12 +7,4 @@ public abstract class Scene : BaseEntity {
     public string sceneName {
         get { return gameObject.scene.name; }
     }
-
-    public virtual void PreUnload() { }
-
-    public IEnumerator Unload() {
-        yield return Resources.UnloadUnusedAssets();
-
-        System.GC.Collect();
-    }
 }

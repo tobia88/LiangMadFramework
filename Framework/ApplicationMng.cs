@@ -18,6 +18,7 @@ public class ApplicationMng : MonoBehaviour {
     }
 
     private void InitializeGame() {
+        GameData.Init();
         AudioMng.Init();
         DataMng.Init();
         InputMng.Init();
