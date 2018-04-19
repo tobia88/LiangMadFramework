@@ -11,6 +11,10 @@ public class SceneData {
     public UnityEngine.Object transitionScene;
     public SceneTypes sceneType;
 
+    public bool IsLoaded {
+        get { return SceneManager.GetSceneByName(scene.name).isLoaded; }
+    }
+
     public string sceneName {
         get { return (scene != null) ? scene.name : string.Empty; }
     }
@@ -36,6 +40,12 @@ public class SceneLoadProgress {
         sceneName = _data.sceneName;
         sceneType = _data.sceneType;
         sceneMode = _sceneMode;
+    }
+
+    public SceneLoadProgress(string _name, SceneTypes _type, LoadSceneMode _mode) {
+        sceneName = _name;
+        sceneType = _type;
+        sceneMode = _mode;
     }
 
     public SceneLoadProgress OnFinished(Action<SceneLoadProgress> _func) {
@@ -69,7 +79,8 @@ public class SceneLoadProgress {
 
 public enum SceneTypes {
     Main,
-    Sub
+    AdditiveLoadInStart,
+    AdditiveLoadManually
 }
 
 public class SceneMng : MonoBehaviour {
@@ -91,7 +102,7 @@ public class SceneMng : MonoBehaviour {
 
     public SceneLoadProgress LoadScene(SceneData _sceneData) {
         SceneLoadProgress retval = new SceneLoadProgress(_sceneData, LoadSceneMode.Additive);
-        StartCoroutine(LoadSceneAsync(retval));
+        StartCoroutine(LoadSceneAsync(retval, _sceneData.transitionScene));
         return retval;
     }
 
@@ -104,11 +115,14 @@ public class SceneMng : MonoBehaviour {
         Debug.Log("Current Scene: " + CurrentScene);
     }
 
-    IEnumerator LoadSceneAsync(SceneLoadProgress _sceneProgress) {
+    IEnumerator LoadSceneAsync(SceneLoadProgress _sceneProgress, UnityEngine.Object _transitionScene = null) {
         yield return null;
 
         if (!_sceneProgress.isLoaded) {
             if (_sceneProgress.sceneType == SceneTypes.Main) {
+                if (_transitionScene != null) {
+                    yield return StartCoroutine(SceneTransitionRoutine(_transitionScene));
+                }
                 if (!string.IsNullOrEmpty(CurrentScene)) {
                     yield return StartCoroutine(UnloadSceneProgress(CurrentScene));
                 }
@@ -122,6 +136,15 @@ public class SceneMng : MonoBehaviour {
         _sceneProgress.LoadingFinished();
 
         Debug.Log("[SceneMng]:Scene Loaded: " + _sceneProgress.sceneName);
+    }
+
+    IEnumerator SceneTransitionRoutine(UnityEngine.Object _transitionScene) {
+        AsyncOperation load = SceneManager.LoadSceneAsync(_transitionScene.name, LoadSceneMode.Additive);
+        yield return new WaitUntil(() => load.isDone);
+        BaseTransition transition = FindObjectOfType<BaseTransition>();
+        transition.SetState(BaseTransition.TransitionStates.ToReady);
+        yield return new WaitUntil(() => transition.State == BaseTransition.TransitionStates.Ready);
+        transition.SetState(BaseTransition.TransitionStates.ToFinish);
     }
 
     IEnumerator UnloadSceneProgress(string _sceneName) {

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class LiangExtentions {
     // ===============================================
@@ -66,5 +67,11 @@ public static class LiangExtentions {
             else
                 Object.DestroyImmediate(_trans.GetChild(i).gameObject);
         }
+    }
+
+    public static void SetAlpha(this Image _image, float _alpha) {
+        Color c = _image.color;
+        c.a = _alpha;
+        _image.color = c;
     }
 }

@@ -7,4 +7,8 @@ public abstract class Scene : BaseEntity {
     public string sceneName {
         get { return gameObject.scene.name; }
     }
+
+    public IEnumerator UnloadSceneRoutine() {
+        yield return 1;
+    }
 }
