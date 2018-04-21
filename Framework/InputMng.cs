@@ -42,6 +42,7 @@ public class KeyCodeExectutor {
         this.callFunc = callFunc;
 
         assignedKeys = new List<KeyCodeAssign>();
+
         foreach (var k in keyCodes) {
             assignedKeys.Add(new KeyCodeAssign(k));
         }

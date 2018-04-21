@@ -78,9 +78,9 @@ public class SceneLoadProgress {
 }
 
 public enum SceneTypes {
-    Main,
-    AdditiveLoadInStart,
-    AdditiveLoadManually
+    Baked,
+    AdditiveAsync,
+    DontLoad
 }
 
 public class SceneMng : MonoBehaviour {
@@ -119,7 +119,7 @@ public class SceneMng : MonoBehaviour {
         yield return null;
 
         if (!_sceneProgress.isLoaded) {
-            if (_sceneProgress.sceneType == SceneTypes.Main) {
+            if (_sceneProgress.sceneType == SceneTypes.Baked) {
                 if (_transitionScene != null) {
                     yield return StartCoroutine(SceneTransitionRoutine(_transitionScene));
                 }

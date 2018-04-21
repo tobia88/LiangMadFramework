@@ -21,7 +21,7 @@ public class SceneFieldPropertyDrawer : PropertyDrawer {
         EditorGUI.ObjectField(amountRect, property.FindPropertyRelative("scene"), typeof(SceneAsset), GUIContent.none);
         EditorGUI.PropertyField(sceneTypeRect, property.FindPropertyRelative("sceneType"), GUIContent.none);
         
-        if ((SceneTypes)property.FindPropertyRelative("sceneType").enumValueIndex == SceneTypes.Main) {
+        if ((SceneTypes)property.FindPropertyRelative("sceneType").enumValueIndex == SceneTypes.Baked) {
             var tSceneRect = new Rect(position.x, position.y + 18, position.width * 0.5f, 15);
             EditorGUI.ObjectField(tSceneRect, property.FindPropertyRelative("transitionScene"), typeof(SceneAsset), GUIContent.none);
         }
@@ -30,7 +30,7 @@ public class SceneFieldPropertyDrawer : PropertyDrawer {
     }
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-        if ((SceneTypes) property.FindPropertyRelative("sceneType").enumValueIndex == SceneTypes.Main) {
+        if ((SceneTypes) property.FindPropertyRelative("sceneType").enumValueIndex == SceneTypes.Baked) {
             return base.GetPropertyHeight(property, label) * 2f + 2;
         }
         return base.GetPropertyHeight(property, label);
