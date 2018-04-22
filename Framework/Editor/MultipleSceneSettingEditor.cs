@@ -11,21 +11,37 @@ public class MultipleSceneSettingEditor : Editor {
 
     public override void OnInspectorGUI() {
         var t = target as MultipleSceneSetting;
-        EditorGUILayout.ObjectField(new GUIContent("Data"), t.LinkingData, typeof(MultipleSceneLinkingData), false);
 
-        var sceneDatas = t.LinkingData.multipleScenesDatas;
+        var data = EditorGUILayout.ObjectField("Data", t.linkingData, typeof(MultipleSceneLinkingData), false);
 
-        for(int i = 0; i < sceneDatas.Count; i++) {
-            EditorGUI.indentLevel++;
-            EditorGUILayout.PrefixLabel(new GUIContent(sceneDatas[i].sceneName));
-            var newSceneType = (SceneTypes) EditorGUILayout.EnumPopup(sceneDatas[i].sceneType);
-
-            if (sceneDatas[i].sceneType != newSceneType) {
-                
-                //sceneDatas[i].sceneType = newSceneType;
-            }
-            EditorGUI.indentLevel--;
+        if (data != t.linkingData) {
+            Undo.RecordObject(t, "Linking Data Update");
+            t.linkingData = (MultipleSceneLinkingData) data;
+            EditorUtility.SetDirty(t);
         }
+
+        if (GUILayout.Button("Create New")) {
+            var path = EditorUtility.SaveFilePanelInProject("Save Data", "SceneData", "asset", "Message");
+
+            if (path.Length != 0) {
+                var newData = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
+                AssetDatabase.CreateAsset(newData, path);
+                AssetDatabase.SaveAssets();
+
+                t.linkingData = newData;
+            }
+        }
+
+
+        var so = new SerializedObject(t.linkingData);
+
+        so.Update();
+
+        var list = so.FindProperty("multipleScenesDatas");
+
+        EditorGUILayout.PropertyField(list, true);
+
+        so.ApplyModifiedProperties();
     }
 }
 
@@ -40,7 +56,7 @@ static class MultipleSceneListener {
             var settings = GameObject.FindObjectsOfType<MultipleSceneSetting>();
 
             if (settings.Length > 1) {
-                Debug.LogWarning("[MultipleSceneEditor]: Make sure there's only a scene component in active Scene!");
+                Debug.LogWarning("[MultipleSceneEditor] Make sure there's only a scene component in active Scene!");
                 return;
             }
             else if (settings.Length == 1) {
@@ -50,95 +66,95 @@ static class MultipleSceneListener {
     }
 
     static void SetupScenes(MultipleSceneSetting _setting) {
-        var datas = _setting.LinkingData.multipleScenesDatas;
+        var datas = _setting.linkingData.multipleScenesDatas;
 
         foreach (var d in datas) {
-            EditorSceneManager.OpenScene(d.scenePath, OpenSceneMode.Additive);
-            Debug.Log("[MultipleSceneSetting]: Scene Loaded Additively = " + d.sceneName);
+            var path = AssetDatabase.GetAssetPath(d.sceneObject);
+            EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+            Debug.Log("[MultipleSceneSetting] Scene Loaded Additively = " + d.sceneObject.name);
         }
     }
 }
 
 
-public class MultipleSceneEditor : UnityEditor.AssetModificationProcessor {
-    static bool isSaving = false;
+//public class MultipleSceneEditor : UnityEditor.AssetModificationProcessor {
+//    static string[] OnWillSaveAssets(string[] paths) {
+//        EnsureFolderExist();
+//        SetupScenesData();
 
-    static string[] OnWillSaveAssets(string[] paths) {
-        if (isSaving)
-            return paths;
+//        return paths;
+//    }
 
-        isSaving = true;
-        EnsureFolderExist();
-        SetupScenesData();
-        isSaving = false;
+//    static void EnsureFolderExist() {
+//        if (!Directory.Exists(Config.SceneSaveDataPath)) {
+//            Directory.CreateDirectory(Config.SceneSaveDataPath);
+//            Debug.Log("[Directory Created] " + Config.SceneSaveDataPath);
+//        }
+//    }
 
-        return paths;
-    }
+//    static void SetupScenesData() {
+//        if (EditorSceneManager.sceneCount > 1) {
+//            MultipleSceneSetting setting = EnsureSettingObject();
+//            CreateSceneDatas(setting);
+//        }
+//    }
 
-    static void EnsureFolderExist() {
-        if (!Directory.Exists(GameData.SceneSaveDataPath)) {
-            Directory.CreateDirectory(GameData.SceneSaveDataPath);
-            Debug.Log("[Directory Created]: " + GameData.SceneSaveDataPath);
-        }
-    }
+//    static MultipleSceneSetting EnsureSettingObject() {
+//        var retval = Object.FindObjectOfType<MultipleSceneSetting>();
+//        if (retval == null) {
+//            var go = new GameObject("MultpleSceneSetting");
+//            go.transform.SetAsFirstSibling();
+//            retval = go.AddComponent<MultipleSceneSetting>();
+//        }
 
-    static void SetupScenesData() {
-        if (EditorSceneManager.sceneCount > 1) {
-            MultipleSceneSetting setting = EnsureSettingObject();
-            CreateSceneDatas(setting);
-        }
-    }
+//        return retval;
+//    }
 
-    static MultipleSceneSetting EnsureSettingObject() {
-        var retval = Object.FindObjectOfType<MultipleSceneSetting>();
-        if (retval == null) {
-            var go = new GameObject("MultpleSceneSetting");
-            go.transform.SetAsFirstSibling();
-            retval = go.AddComponent<MultipleSceneSetting>();
-        }
+//    static void CreateSceneDatas(MultipleSceneSetting _setting) {
+//        var setups = EditorSceneManager.GetSceneManagerSetup();
+//        var datas = new List<MultipleScenesData>();
 
-        return retval;
-    }
+//        var linkData = _setting.linkingData;
 
-    static void CreateSceneDatas(MultipleSceneSetting _setting) {
-        var setups = EditorSceneManager.GetSceneManagerSetup();
-        var datas = new List<MultipleScenesData>();
+//        if (linkData == null) {
+//            linkData = InitSceneLinkData(_setting.gameObject.scene.name);
+//        }
 
-        var linkData = _setting.LinkingData;
+//        for (int i = 0; i < setups.Length; i++) {
+//            if (setups[i].path == EditorSceneManager.GetActiveScene().path) {
+//                continue; // Skip if Active Scene
+//            }
 
-        if (linkData == null) {
-            linkData = InitSceneLinkData(_setting.SceneName);
-        }
+//            MultipleScenesData dataToAdd = null;
 
-        for (int i = 0; i < setups.Length; i++) {
-            if (setups[i].path == EditorSceneManager.GetActiveScene().path) {
-                continue; // Skip if Active Scene
-            }
+//            if (linkData.multipleScenesDatas != null && linkData.multipleScenesDatas.Count > 0) {
 
-            if (linkData.multipleScenesDatas != null && linkData.multipleScenesDatas.Count > 0) {
-                foreach (var d in linkData.multipleScenesDatas) {
-                    if (d.scenePath == setups[i].path) {
-                        datas.Add(d);
-                        continue;
-                    }
-                }
-            }
+//                foreach (var d in linkData.multipleScenesDatas) {
+//                    if (d.scenePath == setups[i].path) {
+//                        dataToAdd = d;
+//                        break;
+//                    }
+//                }
+//            }
 
-            var actualScene = EditorSceneManager.GetSceneByPath(setups[i].path);
-            datas.Add(new MultipleScenesData(actualScene.name, setups[i].path, SceneTypes.AdditiveAsync));
-        }
+//            if (dataToAdd == null) {
+//                var actualScene = EditorSceneManager.GetSceneByPath(setups[i].path);
+//                dataToAdd = new MultipleScenesData(actualScene.name, setups[i].path, SceneTypes.AdditiveAsync);
+//            }
 
-        linkData.multipleScenesDatas = datas;
+//            datas.Add(dataToAdd);
+//        }
 
-        Debug.Log("Data Saved");
-    }
+//        linkData.multipleScenesDatas = datas;
 
-    static MultipleSceneLinkingData InitSceneLinkData(string _sceneName) {
-        var retval = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
+//        _setting.linkingData = linkData;
+//    }
 
-        AssetDatabase.CreateAsset(retval, GameData.SceneDataPath + "/" + _sceneName + ".asset");
-        AssetDatabase.SaveAssets();
+//    static MultipleSceneLinkingData InitSceneLinkData(string _sceneName) {
+//        var retval = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
 
-        return retval;
-    }
-}
+//        AssetDatabase.CreateAsset(retval, Config.SceneSaveDataPath + "/" + _sceneName + ".asset");
+
+//        return retval;
+//    }
+//}

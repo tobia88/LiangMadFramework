@@ -5,15 +5,10 @@ using System.IO;
 using UnityEngine;
 
 public class DataMng : MonoBehaviour {
-    private static DataMng _Instance;
-
-    public static DataMng Instance {
-        get { return _Instance; }
-    }
-
+    public static DataMng Instance { get; private set; }
 
     public static void Init() {
-        _Instance = FindObjectOfType<DataMng>();
+        Instance = FindObjectOfType<DataMng>();
     }
 
     public void Save(object p_data, string p_path) {
