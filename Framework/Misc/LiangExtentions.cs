@@ -69,6 +69,24 @@ public static class LiangExtentions {
         }
     }
 
+
+    // ===============================================
+    // GAME OBJECT EXTENSIONS
+    // ===============================================
+
+    public static T GetFirstScript<T>(this GameObject[] _objects) where T : MonoBehaviour {
+        T retval = null;
+
+        foreach (GameObject go in _objects) {
+            retval = go.GetComponent<T>();
+
+            if (retval != null)
+                break;
+        }
+
+        return retval;
+    }
+
     public static void SetAlpha(this Image _image, float _alpha) {
         Color c = _image.color;
         c.a = _alpha;

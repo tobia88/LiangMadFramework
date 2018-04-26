@@ -32,12 +32,11 @@ public class MultipleSceneSettingEditor : Editor {
             }
         }
 
-
         var so = new SerializedObject(t.linkingData);
 
         so.Update();
 
-        var list = so.FindProperty("multipleScenesDatas");
+        var list = so.FindProperty("sceneDatas");
 
         EditorGUILayout.PropertyField(list, true);
 
@@ -66,7 +65,7 @@ static class MultipleSceneListener {
     }
 
     static void SetupScenes(MultipleSceneSetting _setting) {
-        var datas = _setting.linkingData.multipleScenesDatas;
+        var datas = _setting.linkingData.sceneDatas;
 
         foreach (var d in datas) {
             var path = AssetDatabase.GetAssetPath(d.sceneObject);

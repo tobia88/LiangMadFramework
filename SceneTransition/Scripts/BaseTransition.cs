@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseTransition : Scene {
+public class BaseTransition : BaseScene {
     public TransitionStates State { get; private set; }
 
     public enum TransitionStates {
@@ -41,4 +41,5 @@ public class BaseTransition : Scene {
     protected virtual void OnChangeFinish() {
         SceneMng.Instance.UnloadScene(sceneName);
     }
+    public virtual void OnProgressUpdate(string _sceneName, float _progress) { }
 }
