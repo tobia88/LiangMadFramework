@@ -12,68 +12,126 @@ public class MultipleSceneSettingEditor : Editor {
     public override void OnInspectorGUI() {
         var t = target as MultipleSceneSetting;
 
-        var data = EditorGUILayout.ObjectField("Data", t.linkingData, typeof(MultipleSceneLinkingData), false);
+        serializedObject.Update();
 
-        if (data != t.linkingData) {
-            Undo.RecordObject(t, "Linking Data Update");
-            t.linkingData = (MultipleSceneLinkingData) data;
-            EditorUtility.SetDirty(t);
-        }
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("linkingData"));
+
 
         if (GUILayout.Button("Create New")) {
-            var path = EditorUtility.SaveFilePanelInProject("Save Data", "SceneData", "asset", "Message");
-
-            if (path.Length != 0) {
-                var newData = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
-                AssetDatabase.CreateAsset(newData, path);
-                AssetDatabase.SaveAssets();
-
-                t.linkingData = newData;
-            }
+            CreateNew(t);
         }
 
-        var so = new SerializedObject(t.linkingData);
+        GUILayout.BeginHorizontal();
 
-        so.Update();
+        if (t.linkingData != null && GUILayout.Button("Load Scenes")) {
+            LoadScenes(t);
+        }
 
-        var list = so.FindProperty("sceneDatas");
+        if (t.linkingData != null && GUILayout.Button("Save Current")) {
+            UpdateScenes(t);
+        }
 
-        EditorGUILayout.PropertyField(list, true);
+        GUILayout.EndHorizontal();
 
-        so.ApplyModifiedProperties();
-    }
-}
+        serializedObject.ApplyModifiedProperties();
 
-[InitializeOnLoad]
-static class MultipleSceneListener {
-    static MultipleSceneListener() {
-        EditorSceneManager.sceneOpened += SceneOpenedCallback;
-    }
 
-    private static void SceneOpenedCallback(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode) {
-        if (mode == OpenSceneMode.Single) {
-            var settings = GameObject.FindObjectsOfType<MultipleSceneSetting>();
+        if (t.linkingData != null) {
+            var so = new SerializedObject(t.linkingData);
 
-            if (settings.Length > 1) {
-                Debug.LogWarning("[MultipleSceneEditor] Make sure there's only a scene component in active Scene!");
-                return;
-            }
-            else if (settings.Length == 1) {
-                SetupScenes(settings[0]);
-            }
+            so.Update();
+
+            var list = so.FindProperty("sceneDatas");
+
+            EditorGUILayout.PropertyField(list, true);
+
+            so.ApplyModifiedProperties();
         }
     }
 
-    static void SetupScenes(MultipleSceneSetting _setting) {
-        var datas = _setting.linkingData.sceneDatas;
+    void CreateNew(MultipleSceneSetting _target) {
+        var path = EditorUtility.SaveFilePanelInProject("Save Data", "SceneData", "asset", "Message");
 
-        foreach (var d in datas) {
+        if (path.Length != 0) {
+            var newData = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
+            AssetDatabase.CreateAsset(newData, path);
+            AssetDatabase.SaveAssets();
+
+            _target.linkingData = newData;
+        }
+    }
+
+
+    void LoadScenes(MultipleSceneSetting _target) {
+        foreach (var d in _target.linkingData.sceneDatas) {
+            if (d.IsLoaded)
+                continue;
+
             var path = AssetDatabase.GetAssetPath(d.sceneObject);
             EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
             Debug.Log("[MultipleSceneSetting] Scene Loaded Additively = " + d.sceneObject.name);
         }
     }
+
+    void UpdateScenes(MultipleSceneSetting _target) {
+        var setups = EditorSceneManager.GetSceneManagerSetup();
+
+        var newList = new List<MultipleScenesData>();
+
+        foreach (var s in setups) {
+            SceneAsset scn = AssetDatabase.LoadAssetAtPath<SceneAsset>(s.path);
+            MultipleScenesData dataToAdd = null;
+            foreach (var d in _target.linkingData.sceneDatas) {
+                if (scn.name == d.SceneName) {
+                    dataToAdd = d;
+                    break;
+                }
+            }
+
+            if (dataToAdd == null) {
+                dataToAdd = new MultipleScenesData();
+                dataToAdd.sceneObject = scn;
+            }
+
+            newList.Add(dataToAdd);
+        }
+        
+        Undo.RecordObject(_target.linkingData, "List Update");
+        _target.linkingData.sceneDatas = newList;
+        EditorUtility.SetDirty(_target.linkingData);
+    }
 }
+
+//[InitializeOnLoad]
+//static class MultipleSceneListener {
+//    static MultipleSceneListener() {
+//        EditorSceneManager.sceneOpened += SceneOpenedCallback;
+//    }
+
+//    private static void SceneOpenedCallback(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode) {
+//        if (mode == OpenSceneMode.Single) {
+//            var settings = GameObject.FindObjectsOfType<MultipleSceneSetting>();
+
+//            if (settings.Length > 1) {
+//                Debug.LogWarning("[MultipleSceneEditor] Make sure there's only a scene component in active Scene!");
+//                return;
+//            }
+//            else if (settings.Length == 1) {
+//                SetupScenes(settings[0]);
+//            }
+//        }
+//    }
+
+//    static void SetupScenes(MultipleSceneSetting _setting) {
+//        var datas = _setting.linkingData.sceneDatas;
+
+//        foreach (var d in datas) {
+//            var path = AssetDatabase.GetAssetPath(d.sceneObject);
+//            EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+//            Debug.Log("[MultipleSceneSetting] Scene Loaded Additively = " + d.sceneObject.name);
+//        }
+//    }
+//}
 
 
 //public class MultipleSceneEditor : UnityEditor.AssetModificationProcessor {

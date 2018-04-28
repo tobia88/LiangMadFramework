@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public abstract class BaseScene : BaseEntity {
-    public string sceneName {
+    public string SceneName {
         get { return gameObject.scene.name; }
     }
 

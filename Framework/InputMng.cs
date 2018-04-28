@@ -33,13 +33,15 @@ public class KeyCodeExectutor {
     public string key;
     public bool onlyExecuteOnce;
     public bool isActivated;
+    public MonoBehaviour owner;
     public Action callFunc;
     public List<KeyCodeAssign> assignedKeys;
 
-    public KeyCodeExectutor(string key, Action callFunc, bool onlyExecuteOnce, params KeyCode[] keyCodes) {
-        this.key = key;
-        this.onlyExecuteOnce = onlyExecuteOnce;
-        this.callFunc = callFunc;
+    public KeyCodeExectutor(MonoBehaviour _owner, string _key, Action _callFunc, bool _onlyExecuteOnce, params KeyCode[] keyCodes) {
+        owner = _owner;
+        key = _key;
+        onlyExecuteOnce = _onlyExecuteOnce;
+        callFunc = _callFunc;
 
         assignedKeys = new List<KeyCodeAssign>();
 
@@ -56,7 +58,9 @@ public class KeyCodeExectutor {
                 return;
             }
 
-            callFunc();
+            if (callFunc != null)
+                callFunc();
+
             isActivated = true;
         }
         else {
@@ -79,31 +83,18 @@ public class InputMng : MonoBehaviour {
         _Instance = FindObjectOfType<InputMng>();
     }
 
-    public void Assign(Action p_func, bool p_executeOnce, params KeyCode[] p_keyCodes) {
-        var key = KeyCodesToKey (p_keyCodes);
+    public void Assign(MonoBehaviour _owner, Action _func, bool _executeOnce, params KeyCode[] _keyCodes) {
+        var key = KeyCodesToKey (_keyCodes);
 
         if (keysDict.ContainsKey(key)) {
-            Debug.Log("InputMng:Key is already assigned, Update Function");
-            keysDict[key].callFunc = p_func;
+            Debug.Log("[InputMng]: Key is already assigned, Update Function");
+            keysDict[key].callFunc = _func;
         }
         else {
-            Debug.Log("InputMng:Key " + p_keyCodes.ToArrayString() + " Is Succeed Assigned");
-            var e = new KeyCodeExectutor (key, p_func, p_executeOnce, p_keyCodes);
+            Debug.Log("[InputMng]: Key " + _keyCodes.ToArrayString() + " Is Succeed Assigned");
+            var e = new KeyCodeExectutor (_owner, key, _func, _executeOnce, _keyCodes);
             keysDict.Add(key, e);
             executors.Add(e);
-        }
-    }
-
-    public void Assign(Action func, params KeyCode[] p_keyCodes) {
-        var key = KeyCodesToKey (p_keyCodes);
-
-        if (keysDict.ContainsKey(key)) {
-            Debug.Log("Key is already assigned, Update Function");
-            keysDict[key].callFunc = func;
-        }
-        else {
-            var executor = new KeyCodeExectutor (key, func, false, p_keyCodes);
-            keysDict.Add(key, executor);
         }
     }
 
@@ -114,7 +105,13 @@ public class InputMng : MonoBehaviour {
     }
 
     private void Update() {
-        executors.ForEach(e => e.Update());
+        for (int i = executors.Count - 1; i >= 0; i--) {
+            if (executors[i].owner == null) {
+                executors.RemoveAt(i);
+            }
+            else
+                executors[i].Update();
+        }
     }
 
 }
