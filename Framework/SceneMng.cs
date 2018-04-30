@@ -86,7 +86,6 @@ public class SceneMng : MonoBehaviour {
         }
     }
 
-
     public SceneLoadProgress LoadScene(string _sceneName) {
         var progress = new SceneLoadProgress(_sceneName);
         StartCoroutine(progress.LoadSceneAsync());
