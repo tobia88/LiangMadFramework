@@ -40,11 +40,14 @@ public class SceneLoadProgress {
             var async = SceneManager.LoadSceneAsync(SceneName, LoadSceneMode.Additive);
 
             while (async.progress < 1f) {
+                Progress = async.progress;
                 yield return 1;
             }
         }
 
         yield return 1;
+
+        Progress = 1;
 
         if (onProgressFinish != null)
             onProgressFinish();

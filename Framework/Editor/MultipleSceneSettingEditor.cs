@@ -9,6 +9,11 @@ using System.IO;
 [CustomEditor(typeof(MultipleSceneSetting))]
 public class MultipleSceneSettingEditor : Editor {
 
+    //[MenuItem("LiangMadFramework/Scenes", )]
+    //static void SetupSceneFromSelection() {
+
+    //}
+
     public override void OnInspectorGUI() {
         var t = target as MultipleSceneSetting;
 
