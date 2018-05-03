@@ -6,8 +6,8 @@ using UnityEditor.SceneManagement;
 using System.Linq;
 using System.IO;
 
-[CustomEditor(typeof(MultipleSceneSetting))]
-public class MultipleSceneSettingEditor : Editor {
+[CustomEditor(typeof(SceneReference))]
+public class SceneReferenceEditor : Editor {
 
     //[MenuItem("LiangMadFramework/Scenes", )]
     //static void SetupSceneFromSelection() {
@@ -15,7 +15,7 @@ public class MultipleSceneSettingEditor : Editor {
     //}
 
     public override void OnInspectorGUI() {
-        var t = target as MultipleSceneSetting;
+        var t = target as SceneReference;
 
         serializedObject.Update();
 
@@ -54,11 +54,11 @@ public class MultipleSceneSettingEditor : Editor {
         }
     }
 
-    void CreateNew(MultipleSceneSetting _target) {
+    void CreateNew(SceneReference _target) {
         var path = EditorUtility.SaveFilePanelInProject("Save Data", "SceneData", "asset", "Message");
 
         if (path.Length != 0) {
-            var newData = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
+            var newData = ScriptableObject.CreateInstance<MultipleSceneSetting>();
             AssetDatabase.CreateAsset(newData, path);
             AssetDatabase.SaveAssets();
 
@@ -67,7 +67,7 @@ public class MultipleSceneSettingEditor : Editor {
     }
 
 
-    void LoadScenes(MultipleSceneSetting _target) {
+    void LoadScenes(SceneReference _target) {
         foreach (var d in _target.linkingData.sceneDatas) {
             if (d.IsLoaded)
                 continue;
@@ -78,7 +78,7 @@ public class MultipleSceneSettingEditor : Editor {
         }
     }
 
-    void UpdateScenes(MultipleSceneSetting _target) {
+    void UpdateScenes(SceneReference _target) {
         var setups = EditorSceneManager.GetSceneManagerSetup();
 
         var newList = new List<MultipleScenesData>();

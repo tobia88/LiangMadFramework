@@ -18,6 +18,10 @@ public class Sound {
     public float GetPitch() {
         return ( randomPitch ) ? Random.Range(minPitch, maxPitch) : pitch;
     }
+
+    public bool IsValid {
+        get { return clip != null; }
+    }
 }
 
 public class AudioMng : MonoBehaviour {
@@ -29,51 +33,51 @@ public class AudioMng : MonoBehaviour {
 
     public Dictionary<AudioClip, AudioSource> sources = new Dictionary<AudioClip, AudioSource>();
 
-    public void Play(Sound p_snd, bool p_forceReplay = false) {
-        AudioSource src = GetSource(p_snd);
+    public void Play(Sound _snd, bool _forceReplay = false) {
+        AudioSource src = GetSource(_snd);
 
-        if (src.isPlaying && !p_forceReplay)
+        if (src.isPlaying && !_forceReplay)
             return;
 
-        src.volume = p_snd.volume;
-        src.pitch = p_snd.GetPitch();
-        src.loop = p_snd.loop;
+        src.volume = _snd.volume;
+        src.pitch = _snd.GetPitch();
+        src.loop = _snd.loop;
         src.Play();
     }
 
-    public void PlayOneShot(Sound p_snd) {
-        AudioSource src = GetSource(p_snd);
+    public void PlayOneShot(Sound _snd) {
+        AudioSource src = GetSource(_snd);
 
-        src.pitch = p_snd.GetPitch();
-        src.PlayOneShot(p_snd.clip, src.volume);
+        src.pitch = _snd.GetPitch();
+        src.PlayOneShot(_snd.clip, src.volume);
     }
 
-    public void Fade(Sound p_snd, float p_volume, float p_duration) {
-        AudioSource src = GetSource(p_snd);
-        src.DOFade(p_volume, p_duration);
+    public void Fade(Sound _snd, float _volume, float _duration, TweenCallback _callback = null) {
+        AudioSource src = GetSource(_snd);
+        src.DOFade(_volume, _duration).OnComplete(_callback);
     }
 
-    public void Stop(Sound p_snd) {
-        if (sources.ContainsKey(p_snd.clip))
-            sources[p_snd.clip].Stop();
+    public void Stop(Sound _snd) {
+        if (sources.ContainsKey(_snd.clip))
+            sources[_snd.clip].Stop();
     }
 
-    public AudioSource Add(Sound p_snd) {
-        GameObject go = new GameObject(p_snd.clip.name);
+    public AudioSource Add(Sound _snd) {
+        GameObject go = new GameObject(_snd.clip.name);
         go.transform.SetParent(transform);
 
         AudioSource retval = go.AddComponent<AudioSource>();
-        sources.Add(p_snd.clip, retval);
-        retval.clip = p_snd.clip;
+        sources.Add(_snd.clip, retval);
+        retval.clip = _snd.clip;
         return retval;
     }
 
-    public AudioSource GetSource(Sound p_snd) {
+    public AudioSource GetSource(Sound _snd) {
         AudioSource src = null;
-        if (!sources.ContainsKey(p_snd.clip))
-            src = Add(p_snd);
+        if (!sources.ContainsKey(_snd.clip))
+            src = Add(_snd);
         else
-            src = sources[p_snd.clip];
+            src = sources[_snd.clip];
 
         return src;
     }

@@ -1,36 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class MultipleSceneSetting : MonoBehaviour {
-    public MultipleSceneLinkingData linkingData;
+public class MultipleSceneSetting : ScriptableObject {
+    public List<MultipleScenesData> sceneDatas = new List<MultipleScenesData>();
+}
 
-    public bool IsLoading { get; private set; }
+[System.Serializable]
+public class MultipleScenesData {
+    public Object sceneObject;
+    public SceneTypes sceneType = SceneTypes.AdditiveAsync;
+    public bool unloadTogether = true;
 
-    protected System.Action m_callback;
-
-    public void LoadScene(System.Action _callback) {
-        if (IsLoading)
-            return;
-
-        m_callback = _callback;
-
-        StartCoroutine(LoadSceneRoutine(linkingData.sceneDatas));
+    public string SceneName {
+        get { return (sceneObject == null) ? string.Empty : sceneObject.name; }
     }
 
-    private IEnumerator LoadSceneRoutine(List<MultipleScenesData> _datas) {
-        IsLoading = true;
-
-        foreach(var d in _datas) {
-            var prog = SceneMng.Instance.LoadScene(d.SceneName);
-
-            while (prog.Progress < 1)
-                yield return 1;
-        }
-
-        IsLoading = false;
-
-        if (m_callback != null)
-            m_callback();
+    public bool IsLoaded {
+        get { return SceneManager.GetSceneByName(SceneName).isLoaded; }
     }
 }

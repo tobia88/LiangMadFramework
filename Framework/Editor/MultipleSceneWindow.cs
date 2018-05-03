@@ -17,9 +17,9 @@ public class MultipleSceneWindow : EditorWindow {
     }
 
     void OnGUI() {
-        var datas = Resources.FindObjectsOfTypeAll<MultipleSceneLinkingData>();
+        var datas = Resources.LoadAll<MultipleSceneSetting>("Datas/Scenes");
 
-        var setting = FindObjectOfType<MultipleSceneSetting>();
+        var setting = FindObjectOfType<SceneReference>();
 
         foreach (var data in datas) {
             GUILayout.BeginHorizontal();
@@ -38,7 +38,7 @@ public class MultipleSceneWindow : EditorWindow {
         }
     }
 
-    static void LoadScenes(MultipleSceneLinkingData _data) {
+    static void LoadScenes(MultipleSceneSetting _data) {
         var sceneSetups = EditorSceneManager.GetSceneManagerSetup();
 
         foreach (var setup in sceneSetups) {
@@ -71,7 +71,7 @@ public class MultipleSceneWindow : EditorWindow {
         }
     }
 
-    static void SaveCurrentHierarchy(MultipleSceneLinkingData _data) {
+    static void SaveCurrentHierarchy(MultipleSceneSetting _data) {
         var setups = EditorSceneManager.GetSceneManagerSetup();
 
         var newList = new List<MultipleScenesData>();

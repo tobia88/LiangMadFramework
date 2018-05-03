@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEditor;
 using System.IO;
 
-[CustomEditor(typeof(MultipleSceneLinkingData))]
+[CustomEditor(typeof(MultipleSceneSetting))]
 public class MultipleSceneLinkingDataEditor : Editor {
 
     [MenuItem("LiangMadFramework/Scenes/Save Current Scenes Hierarchy")]
@@ -17,7 +17,7 @@ public class MultipleSceneLinkingDataEditor : Editor {
         var path = EditorUtility.SaveFilePanelInProject("Create Scene Linking Data", "Scn_Data_1", "asset", "");
 
         if (path.Length != 0) {
-            var linkingData = ScriptableObject.CreateInstance<MultipleSceneLinkingData>();
+            var linkingData = ScriptableObject.CreateInstance<MultipleSceneSetting>();
 
             foreach (var s in setups) {
                 MultipleScenesData data = new MultipleScenesData();
@@ -37,7 +37,7 @@ public class MultipleSceneLinkingDataEditor : Editor {
     }
 
     public override void OnInspectorGUI() {
-        var t = (MultipleSceneLinkingData) target;
+        var t = (MultipleSceneSetting) target;
 
         GUILayout.BeginHorizontal();
 
@@ -78,7 +78,7 @@ public class MultipleSceneLinkingDataEditor : Editor {
         base.OnInspectorGUI();
     }
 
-    void LoadScenes(MultipleSceneLinkingData _data) {
+    void LoadScenes(MultipleSceneSetting _data) {
         var sceneSetups = EditorSceneManager.GetSceneManagerSetup();
 
         foreach (var setup in sceneSetups) {
