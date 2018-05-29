@@ -23,7 +23,7 @@ public class HeatDistort : MonoBehaviour {
         }
 
         var s = DOTween.Sequence();
-        s.Append(transform.DOScale(startSize, 0f));
+        s.Append(transform.DOScale(startSize, 0.1f));
         s.Append(transform.DOScale(endSize, duration).SetEase(Ease.OutQuad));
         s.Join(m_renderer.material.DOFloat(0f, "_BumpAmt", duration).SetEase(Ease.OutQuad));
 
