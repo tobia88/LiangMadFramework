@@ -4,14 +4,17 @@ using UnityEngine;
 using DG.Tweening;
 
 public class HeatDistort : MonoBehaviour {
+    private Renderer m_renderer;
+
     public Vector3 startSize;
     public Vector3 endSize;
     public float duration = 2f;
+    public bool loop = false;
+    public LoopType loopType;
     public bool destroyOnFinished = true;
-    public Renderer render;
 
     private void Awake() {
-        render = GetComponent<Renderer>();
+        m_renderer = GetComponent<Renderer>();
     }
 
     private void Start() {
@@ -19,9 +22,15 @@ public class HeatDistort : MonoBehaviour {
             Destroy(gameObject, duration);
         }
 
-        transform.localScale = startSize;
-        transform.DOScale(endSize, duration);
+        var s = DOTween.Sequence();
+        s.Append(transform.DOScale(startSize, 0f));
+        s.Append(transform.DOScale(endSize, duration).SetEase(Ease.OutQuad));
+        s.Join(m_renderer.material.DOFloat(0f, "_BumpAmt", duration).SetEase(Ease.OutQuad));
 
-        DOTween.To(() => render.material.GetFloat("_BumpAmt"), (v) => render.material.SetFloat("_BumpAmt", v), 0f, duration);
+        if (loop)
+            s.SetLoops(-1, loopType);
+        else
+            s.OnComplete(() => Destroy(gameObject));
+        
     }
 }
