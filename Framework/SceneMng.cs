@@ -13,6 +13,7 @@ public enum SceneTypes
 [System.Serializable]
 public class SceneField
 {
+    [SerializeField]
     public Object sceneObject;
     
     public string SceneName
