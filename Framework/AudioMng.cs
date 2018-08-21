@@ -56,6 +56,7 @@ public class AudioMng : MonoBehaviour
         AudioSource src = GetSource(_snd);
 
         src.pitch = _snd.GetPitch();
+        src.volume = _snd.volume;
         src.PlayOneShot(_snd.clip, src.volume);
     }
 
