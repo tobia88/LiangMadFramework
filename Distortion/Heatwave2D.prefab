@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startSize: {x: 0, y: 0, z: 0}
-  endSize: {x: 15, y: 15, z: 2}
-  duration: 3
+  endSize: {x: 10, y: 10, z: 2}
+  duration: 2
   loop: 0
-  destroyOnFinished: 0
+  destroyOnFinished: 1
